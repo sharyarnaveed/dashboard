@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-background text-text flex items-center justify-center px-4">
+  <div class="min-h-screen bg-background text-text flex items-center justify-center px-4 py-12">
     <div class="w-full max-w-md">
       <!-- Header -->
       <div class="text-center mb-8">
@@ -12,47 +12,73 @@
         <p class="mt-2 text-text-secondary">Sign in to your ClassSync account</p>
       </div>
 
+      <!-- Error Alert -->
+      <div v-if="error" class="mb-4 rounded-lg bg-error bg-opacity-10 border border-error border-opacity-20 p-4 text-error text-sm flex items-start gap-3">
+        <UIcon name="i-lucide-alert-circle" class="h-5 w-5 flex-shrink-0 mt-0.5" />
+        <div>{{ error }}</div>
+      </div>
+
+      <!-- Success Alert -->
+      <div v-if="success" class="mb-4 rounded-lg bg-success bg-opacity-10 border border-success border-opacity-20 p-4 text-success text-sm flex items-start gap-3">
+        <UIcon name="i-lucide-check-circle" class="h-5 w-5 flex-shrink-0 mt-0.5" />
+        <div>{{ success }}</div>
+      </div>
+
       <!-- Login Form -->
       <form @submit.prevent="handleLogin" class="space-y-4">
         <!-- Email Input -->
         <div>
           <label class="block text-sm font-medium mb-2">Email Address</label>
           <input
-            v-model="email"
+            v-model="formData.email"
             type="email"
             placeholder="john@school.edu"
-            class="w-full rounded-lg border border-border bg-surface-light px-4 py-2 text-text placeholder-text-secondary focus:border-primary-500 focus:ring-2 focus:ring-primary-500 focus:ring-opacity-20 outline-none transition"
+            :disabled="isLoading"
+            required
+            class="w-full rounded-lg border border-border bg-surface-light px-4 py-3 text-text placeholder-text-secondary focus:border-primary-500 focus:ring-2 focus:ring-primary-500 focus:ring-opacity-20 outline-none transition disabled:opacity-50 disabled:cursor-not-allowed"
           />
+          <p v-if="fieldErrors.email" class="mt-1 text-xs text-error flex items-center gap-1">
+            <UIcon name="i-lucide-alert-circle" class="h-3 w-3" />
+            {{ fieldErrors.email }}
+          </p>
         </div>
 
         <!-- Password Input -->
         <div>
-          <label class="block text-sm font-medium mb-2">Password</label>
+          <div class="flex items-center justify-between mb-2">
+            <label class="block text-sm font-medium">Password</label>
+            <NuxtLink to="/forgot-password" class="text-xs text-primary-400 hover:text-primary-300 transition">
+              Forgot password?
+            </NuxtLink>
+          </div>
           <input
-            v-model="password"
+            v-model="formData.password"
             type="password"
             placeholder="••••••••"
-            class="w-full rounded-lg border border-border bg-surface-light px-4 py-2 text-text placeholder-text-secondary focus:border-primary-500 focus:ring-2 focus:ring-primary-500 focus:ring-opacity-20 outline-none transition"
+            :disabled="isLoading"
+            required
+            class="w-full rounded-lg border border-border bg-surface-light px-4 py-3 text-text placeholder-text-secondary focus:border-primary-500 focus:ring-2 focus:ring-primary-500 focus:ring-opacity-20 outline-none transition disabled:opacity-50 disabled:cursor-not-allowed"
           />
+          <p v-if="fieldErrors.password" class="mt-1 text-xs text-error flex items-center gap-1">
+            <UIcon name="i-lucide-alert-circle" class="h-3 w-3" />
+            {{ fieldErrors.password }}
+          </p>
         </div>
 
-        <!-- Remember Me & Forgot Password -->
-        <div class="flex items-center justify-between">
-          <label class="flex items-center gap-2">
-            <input v-model="rememberMe" type="checkbox" class="rounded border border-border" />
-            <span class="text-sm text-text-secondary">Remember me</span>
-          </label>
-          <NuxtLink to="/forgot-password" class="text-sm text-primary-400 hover:text-primary-300">
-            Forgot password?
-          </NuxtLink>
-        </div>
+        <!-- Remember Me -->
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input v-model="formData.rememberMe" type="checkbox" :disabled="isLoading" class="rounded border border-border cursor-pointer" />
+          <span class="text-sm text-text-secondary">Remember me for 30 days</span>
+        </label>
 
         <!-- Login Button -->
         <button
           type="submit"
-          class="w-full mt-6 rounded-lg bg-primary-600 px-4 py-2 font-semibold text-white hover:bg-primary-700 transition"
+          :disabled="isLoading"
+          class="w-full mt-6 rounded-lg bg-primary-600 hover:bg-primary-700 disabled:bg-primary-600 disabled:opacity-50 px-4 py-3 font-semibold text-white transition flex items-center justify-center gap-2"
         >
-          Sign In
+          <span v-if="isLoading" class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-r-transparent"></span>
+          {{ isLoading ? 'Signing in...' : 'Sign In' }}
         </button>
       </form>
 
@@ -62,24 +88,44 @@
           <div class="w-full border-t border-border"></div>
         </div>
         <div class="relative flex justify-center text-sm">
-          <span class="px-2 bg-background text-text-secondary">Don't have an account?</span>
+          <span class="px-2 bg-background text-text-secondary">Or continue with</span>
         </div>
       </div>
 
+      <!-- Social Login Buttons -->
+      <div class="grid grid-cols-2 gap-3">
+        <button
+          type="button"
+          :disabled="isLoading"
+          class="flex items-center justify-center gap-2 rounded-lg border border-border px-4 py-3 text-text hover:bg-surface-light transition disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <UIcon name="i-lucide-github" class="h-5 w-5" />
+          <span class="hidden sm:inline text-sm">GitHub</span>
+        </button>
+        <button
+          type="button"
+          :disabled="isLoading"
+          class="flex items-center justify-center gap-2 rounded-lg border border-border px-4 py-3 text-text hover:bg-surface-light transition disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <UIcon name="i-lucide-mail" class="h-5 w-5" />
+          <span class="hidden sm:inline text-sm">Google</span>
+        </button>
+      </div>
+
       <!-- Signup Link -->
-      <NuxtLink
-        to="/signup"
-        class="block w-full text-center rounded-lg border border-border px-4 py-2 font-semibold text-text hover:bg-surface-light transition"
-      >
-        Create Account
-      </NuxtLink>
+      <p class="mt-6 text-center text-sm text-text-secondary">
+        Don't have an account?
+        <NuxtLink to="/signup" class="text-primary-400 hover:text-primary-300 font-medium transition">
+          Create one
+        </NuxtLink>
+      </p>
 
       <!-- Footer -->
       <p class="mt-6 text-center text-xs text-text-secondary">
         By signing in, you agree to our
-        <a href="#" class="text-primary-400 hover:text-primary-300">Terms of Service</a>
+        <a href="#" class="text-primary-400 hover:text-primary-300 transition">Terms of Service</a>
         and
-        <a href="#" class="text-primary-400 hover:text-primary-300">Privacy Policy</a>
+        <a href="#" class="text-primary-400 hover:text-primary-300 transition">Privacy Policy</a>
       </p>
     </div>
   </div>
@@ -90,11 +136,69 @@ definePageMeta({
   layout: false
 })
 
-const email = ref('')
-const password = ref('')
-const rememberMe = ref(false)
+const formData = ref({
+  email: '',
+  password: '',
+  rememberMe: false
+})
 
-const handleLogin = () => {
-  navigateTo('/dashboard')
+const isLoading = ref(false)
+const error = ref('')
+const success = ref('')
+
+const fieldErrors = ref({
+  email: '',
+  password: ''
+})
+
+const validateForm = (): boolean => {
+  fieldErrors.value = { email: '', password: '' }
+  let isValid = true
+
+  if (!formData.value.email.trim()) {
+    fieldErrors.value.email = 'Email is required'
+    isValid = false
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.value.email)) {
+    fieldErrors.value.email = 'Please enter a valid email address'
+    isValid = false
+  }
+
+  if (!formData.value.password) {
+    fieldErrors.value.password = 'Password is required'
+    isValid = false
+  } else if (formData.value.password.length < 6) {
+    fieldErrors.value.password = 'Password must be at least 6 characters'
+    isValid = false
+  }
+
+  return isValid
+}
+
+const handleLogin = async () => {
+  error.value = ''
+  success.value = ''
+
+  if (!validateForm()) {
+    return
+  }
+
+  isLoading.value = true
+
+  try {
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 1500))
+    
+    // Simulate successful login
+    success.value = 'Login successful! Redirecting to dashboard...'
+    
+    // Redirect after brief delay
+    setTimeout(() => {
+      navigateTo('/dashboard')
+    }, 1000)
+  } catch (err) {
+    error.value = 'Invalid email or password. Please try again.'
+  } finally {
+    isLoading.value = false
+  }
 }
 </script>
