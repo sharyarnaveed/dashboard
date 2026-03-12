@@ -99,15 +99,15 @@
           :disabled="isLoading"
           class="flex items-center justify-center gap-2 rounded-lg border border-border px-4 py-3 text-text hover:bg-surface-light transition disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <UIcon name="i-lucide-github" class="h-5 w-5" />
-          <span class="hidden sm:inline text-sm">GitHub</span>
+          <UIcon name="i-simple-icons-microsoft" class="h-5 w-5" />
+          <span class="hidden sm:inline text-sm">Microsoft</span>
         </button>
         <button
           type="button"
           :disabled="isLoading"
           class="flex items-center justify-center gap-2 rounded-lg border border-border px-4 py-3 text-text hover:bg-surface-light transition disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <UIcon name="i-lucide-mail" class="h-5 w-5" />
+          <UIcon name="i-simple-icons-google" class="h-5 w-5" />
           <span class="hidden sm:inline text-sm">Google</span>
         </button>
       </div>
