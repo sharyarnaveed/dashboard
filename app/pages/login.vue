@@ -24,91 +24,27 @@
         <div>{{ success }}</div>
       </div>
 
-      <!-- Login Form -->
-      <form @submit.prevent="handleLogin" class="space-y-4">
-        <!-- Email Input -->
-        <div>
-          <label class="block text-sm font-medium mb-2">Email Address</label>
-          <input
-            v-model="formData.email"
-            type="email"
-            placeholder="john@school.edu"
-            :disabled="isLoading"
-            required
-            class="w-full rounded-lg border border-border bg-surface-light px-4 py-3 text-text placeholder-text-secondary focus:border-primary-500 focus:ring-2 focus:ring-primary-500 focus:ring-opacity-20 outline-none transition disabled:opacity-50 disabled:cursor-not-allowed"
-          />
-          <p v-if="fieldErrors.email" class="mt-1 text-xs text-error flex items-center gap-1">
-            <UIcon name="i-lucide-alert-circle" class="h-3 w-3" />
-            {{ fieldErrors.email }}
-          </p>
-        </div>
 
-        <!-- Password Input -->
-        <div>
-          <div class="flex items-center justify-between mb-2">
-            <label class="block text-sm font-medium">Password</label>
-            <NuxtLink to="/forgot-password" class="text-xs text-primary-400 hover:text-primary-300 transition">
-              Forgot password?
-            </NuxtLink>
-          </div>
-          <input
-            v-model="formData.password"
-            type="password"
-            placeholder="••••••••"
-            :disabled="isLoading"
-            required
-            class="w-full rounded-lg border border-border bg-surface-light px-4 py-3 text-text placeholder-text-secondary focus:border-primary-500 focus:ring-2 focus:ring-primary-500 focus:ring-opacity-20 outline-none transition disabled:opacity-50 disabled:cursor-not-allowed"
-          />
-          <p v-if="fieldErrors.password" class="mt-1 text-xs text-error flex items-center gap-1">
-            <UIcon name="i-lucide-alert-circle" class="h-3 w-3" />
-            {{ fieldErrors.password }}
-          </p>
-        </div>
-
-        <!-- Remember Me -->
-        <label class="flex items-center gap-2 cursor-pointer">
-          <input v-model="formData.rememberMe" type="checkbox" :disabled="isLoading" class="rounded border border-border cursor-pointer" />
-          <span class="text-sm text-text-secondary">Remember me for 30 days</span>
-        </label>
-
-        <!-- Login Button -->
-        <button
-          type="submit"
-          :disabled="isLoading"
-          class="w-full mt-6 rounded-lg bg-primary-600 hover:bg-primary-700 disabled:bg-primary-600 disabled:opacity-50 px-4 py-3 font-semibold text-white transition flex items-center justify-center gap-2"
-        >
-          <span v-if="isLoading" class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-r-transparent"></span>
-          {{ isLoading ? 'Signing in...' : 'Sign In' }}
-        </button>
-      </form>
-
-      <!-- Divider -->
-      <div class="relative my-8">
-        <div class="absolute inset-0 flex items-center">
-          <div class="w-full border-t border-border"></div>
-        </div>
-        <div class="relative flex justify-center text-sm">
-          <span class="px-2 bg-background text-text-secondary">Or continue with</span>
-        </div>
-      </div>
 
       <!-- Social Login Buttons -->
-      <div class="grid grid-cols-2 gap-3">
+      <div class="space-y-3">
         <button
           type="button"
+          @click="handleMicrosoftLogin"
           :disabled="isLoading"
-          class="flex items-center justify-center gap-2 rounded-lg border border-border px-4 py-3 text-text hover:bg-surface-light transition disabled:opacity-50 disabled:cursor-not-allowed"
+          class="w-full flex items-center justify-center gap-3 rounded-lg border border-border px-4 py-3 text-text hover:bg-surface-light transition disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <UIcon name="i-simple-icons-microsoft" class="h-5 w-5" />
-          <span class="hidden sm:inline text-sm">Microsoft</span>
+          <span class="text-sm font-medium">Continue with Microsoft</span>
         </button>
         <button
           type="button"
+          @click="handleGoogleLogin"
           :disabled="isLoading"
-          class="flex items-center justify-center gap-2 rounded-lg border border-border px-4 py-3 text-text hover:bg-surface-light transition disabled:opacity-50 disabled:cursor-not-allowed"
+          class="w-full flex items-center justify-center gap-3 rounded-lg border border-border px-4 py-3 text-text hover:bg-surface-light transition disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <UIcon name="i-simple-icons-google" class="h-5 w-5" />
-          <span class="hidden sm:inline text-sm">Google</span>
+          <span class="text-sm font-medium">Continue with Google</span>
         </button>
       </div>
 
@@ -136,67 +72,37 @@ definePageMeta({
   layout: false
 })
 
-const formData = ref({
-  email: '',
-  password: '',
-  rememberMe: false
-})
-
 const isLoading = ref(false)
 const error = ref('')
 const success = ref('')
 
-const fieldErrors = ref({
-  email: '',
-  password: ''
-})
-
-const validateForm = (): boolean => {
-  fieldErrors.value = { email: '', password: '' }
-  let isValid = true
-
-  if (!formData.value.email.trim()) {
-    fieldErrors.value.email = 'Email is required'
-    isValid = false
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.value.email)) {
-    fieldErrors.value.email = 'Please enter a valid email address'
-    isValid = false
-  }
-
-  if (!formData.value.password) {
-    fieldErrors.value.password = 'Password is required'
-    isValid = false
-  } else if (formData.value.password.length < 6) {
-    fieldErrors.value.password = 'Password must be at least 6 characters'
-    isValid = false
-  }
-
-  return isValid
-}
-
-const handleLogin = async () => {
-  error.value = ''
-  success.value = ''
-
-  if (!validateForm()) {
-    return
-  }
-
+const handleMicrosoftLogin = async () => {
   isLoading.value = true
-
   try {
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    
-    // Simulate successful login
-    success.value = 'Login successful! Redirecting to dashboard...'
-    
-    // Redirect after brief delay
+    // TODO: Implement Microsoft login
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    success.value = 'Redirecting to Microsoft login...'
     setTimeout(() => {
       navigateTo('/dashboard')
     }, 1000)
   } catch (err) {
-    error.value = 'Invalid email or password. Please try again.'
+    error.value = 'Failed to connect with Microsoft. Please try again.'
+  } finally {
+    isLoading.value = false
+  }
+}
+
+const handleGoogleLogin = async () => {
+  isLoading.value = true
+  try {
+    // TODO: Implement Google login
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    success.value = 'Redirecting to Google login...'
+    setTimeout(() => {
+      navigateTo('/dashboard')
+    }, 1000)
+  } catch (err) {
+    error.value = 'Failed to connect with Google. Please try again.'
   } finally {
     isLoading.value = false
   }
