@@ -1,30 +1,40 @@
 <script setup lang="ts">
 import type { NavigationMenuItem } from '@nuxt/ui'
 
-const route = useRoute()
-const toast = useToast()
-
 const open = ref(false)
 
 const links = [[{
-  label: 'Home',
-  icon: 'i-lucide-house',
-  to: '/',
+  label: 'Dashboard',
+  icon: 'i-lucide-grid-3x3',
+  to: '/dashboard',
   onSelect: () => {
     open.value = false
   }
 }, {
-  label: 'Inbox',
-  icon: 'i-lucide-inbox',
-  to: '/inbox',
-  badge: '4',
+  label: 'My Classes',
+  icon: 'i-lucide-book-open',
+  to: '/classes',
   onSelect: () => {
     open.value = false
   }
 }, {
-  label: 'Customers',
-  icon: 'i-lucide-users',
-  to: '/customers',
+  label: 'Upload Timetable',
+  icon: 'i-lucide-upload',
+  to: '/upload-timetable',
+  onSelect: () => {
+    open.value = false
+  }
+}, {
+  label: 'Calendar',
+  icon: 'i-lucide-calendar',
+  to: '/calendar',
+  onSelect: () => {
+    open.value = false
+  }
+}, {
+  label: 'Integrations',
+  icon: 'i-lucide-plug',
+  to: '/integrations',
   onSelect: () => {
     open.value = false
   }
@@ -32,86 +42,10 @@ const links = [[{
   label: 'Settings',
   to: '/settings',
   icon: 'i-lucide-settings',
-  defaultOpen: true,
-  type: 'trigger',
-  children: [{
-    label: 'General',
-    to: '/settings',
-    exact: true,
-    onSelect: () => {
-      open.value = false
-    }
-  }, {
-    label: 'Members',
-    to: '/settings/members',
-    onSelect: () => {
-      open.value = false
-    }
-  }, {
-    label: 'Notifications',
-    to: '/settings/notifications',
-    onSelect: () => {
-      open.value = false
-    }
-  }, {
-    label: 'Security',
-    to: '/settings/security',
-    onSelect: () => {
-      open.value = false
-    }
-  }]
-}], [{
-  label: 'Feedback',
-  icon: 'i-lucide-message-circle',
-  to: 'https://github.com/nuxt-ui-templates/dashboard',
-  target: '_blank'
-}, {
-  label: 'Help & Support',
-  icon: 'i-lucide-info',
-  to: 'https://github.com/nuxt-ui-templates/dashboard',
-  target: '_blank'
-}]] satisfies NavigationMenuItem[][]
-
-const groups = computed(() => [{
-  id: 'links',
-  label: 'Go to',
-  items: links.flat()
-}, {
-  id: 'code',
-  label: 'Code',
-  items: [{
-    id: 'source',
-    label: 'View page source',
-    icon: 'i-simple-icons-github',
-    to: `https://github.com/nuxt-ui-templates/dashboard/blob/main/app/pages${route.path === '/' ? '/index' : route.path}.vue`,
-    target: '_blank'
-  }]
-}])
-
-onMounted(async () => {
-  const cookie = useCookie('cookie-consent')
-  if (cookie.value === 'accepted') {
-    return
+  onSelect: () => {
+    open.value = false
   }
-
-  toast.add({
-    title: 'We use first-party cookies to enhance your experience on our website.',
-    duration: 0,
-    close: false,
-    actions: [{
-      label: 'Accept',
-      color: 'neutral',
-      variant: 'outline',
-      onClick: () => {
-        cookie.value = 'accepted'
-      }
-    }, {
-      label: 'Opt out',
-      color: 'neutral',
-      variant: 'ghost'
-    }]
-  })
-})
+}]] satisfies NavigationMenuItem[][]
 </script>
 
 <template>
@@ -121,42 +55,41 @@ onMounted(async () => {
       v-model:open="open"
       collapsible
       resizable
-      class="bg-elevated/25"
-      :ui="{ footer: 'lg:border-t lg:border-default' }"
+      class="bg-surface border-r border-border"
+      :ui="{ footer: 'lg:border-t lg:border-border' }"
     >
       <template #header="{ collapsed }">
-        <TeamsMenu :collapsed="collapsed" />
+        <div class="flex items-center gap-2 px-2 py-4">
+          <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-600">
+            <span class="text-sm font-bold text-white">T</span>
+          </div>
+          <div v-if="!collapsed" class="flex flex-col">
+            <span class="text-sm font-semibold text-text">ClassSync</span>
+            <span class="text-xs text-text-secondary">Teacher Platform</span>
+          </div>
+        </div>
       </template>
 
       <template #default="{ collapsed }">
-        <UDashboardSearchButton :collapsed="collapsed" class="bg-transparent ring-default" />
-
         <UNavigationMenu
           :collapsed="collapsed"
           :items="links[0]"
           orientation="vertical"
           tooltip
           popover
-        />
-
-        <UNavigationMenu
-          :collapsed="collapsed"
-          :items="links[1]"
-          orientation="vertical"
-          tooltip
-          class="mt-auto"
+          class="text-text"
         />
       </template>
 
       <template #footer="{ collapsed }">
-        <UserMenu :collapsed="collapsed" />
+        <div v-if="!collapsed" class="border-t border-border p-4">
+          <div class="text-xs text-text-secondary">Logged in as</div>
+          <div class="mt-2 text-sm font-medium text-text">John Doe</div>
+          <div class="text-xs text-text-secondary">john@school.edu</div>
+        </div>
       </template>
     </UDashboardSidebar>
 
-    <UDashboardSearch :groups="groups" />
-
     <slot />
-
-    <NotificationsSlideover />
   </UDashboardGroup>
 </template>
